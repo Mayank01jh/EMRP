@@ -171,6 +171,15 @@ class EMRPApiClient {
     return res.json();
   }
 
+  async seedDemo(): Promise<any> {
+    const res = await fetch(`${API_BASE}/dispatcher/seed-demo`, {
+      method: "POST",
+      headers: this.headers(),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
   connectDispatcherWS(onMessage: (data: any) => void): WebSocket {
     const ws = new WebSocket(`${WS_BASE}/dispatcher/ws`);
     ws.onmessage = (e) => {

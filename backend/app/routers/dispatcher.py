@@ -271,6 +271,179 @@ async def purge_stale_incidents(
     return {"purged_count": res.modified_count, "cutoff_time": cutoff.isoformat()}
 
 
+@router.post("/seed-demo", response_model=dict)
+async def seed_demo_data(
+    db: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: dict = Depends(require_role("dispatcher", "admin", "operator")),
+):
+    """Seed or refresh rich demo emergencies and active ambulance units in the database."""
+    now = utcnow()
+    now_iso = now.isoformat()
+
+    demo_ambulances = [
+        {
+            "_id": "amb-delhi-1081",
+            "created_at": now,
+            "updated_at": now,
+            "registration": "DL-01-AMB-1081",
+            "operator_id": "Delhi-EMS-Central",
+            "status": "AVAILABLE",
+            "capabilities": ["ALS", "VENTILATOR"],
+            "current_location": {"type": "Point", "coordinates": [77.2150, 28.6180]},
+            "location": {"type": "Point", "coordinates": [77.2150, 28.6180]},
+            "heading_deg": 45.0,
+            "speed_kmh": 0.0,
+            "last_seen_at": now_iso,
+            "active_incident_id": None,
+        },
+        {
+            "_id": "amb-delhi-1082",
+            "created_at": now,
+            "updated_at": now,
+            "registration": "DL-02-AMB-1082",
+            "operator_id": "Delhi-EMS-South",
+            "status": "AVAILABLE",
+            "capabilities": ["BLS"],
+            "current_location": {"type": "Point", "coordinates": [77.2020, 28.6100]},
+            "location": {"type": "Point", "coordinates": [77.2020, 28.6100]},
+            "heading_deg": 180.0,
+            "speed_kmh": 0.0,
+            "last_seen_at": now_iso,
+            "active_incident_id": None,
+        },
+        {
+            "_id": "amb-delhi-1083",
+            "created_at": now,
+            "updated_at": now,
+            "registration": "DL-03-AMB-1083",
+            "operator_id": "Delhi-EMS-North",
+            "status": "AVAILABLE",
+            "capabilities": ["ALS", "NEONATAL"],
+            "current_location": {"type": "Point", "coordinates": [77.2280, 28.6250]},
+            "location": {"type": "Point", "coordinates": [77.2280, 28.6250]},
+            "heading_deg": 270.0,
+            "speed_kmh": 0.0,
+            "last_seen_at": now_iso,
+            "active_incident_id": None,
+        },
+        {
+            "_id": "amb-delhi-1084",
+            "created_at": now,
+            "updated_at": now,
+            "registration": "DL-04-AMB-1084",
+            "operator_id": "Delhi-EMS-West",
+            "status": "AVAILABLE",
+            "capabilities": ["ALS", "TRAUMA"],
+            "current_location": {"type": "Point", "coordinates": [77.1900, 28.6400]},
+            "location": {"type": "Point", "coordinates": [77.1900, 28.6400]},
+            "heading_deg": 90.0,
+            "speed_kmh": 0.0,
+            "last_seen_at": now_iso,
+            "active_incident_id": None,
+        },
+    ]
+    for amb in demo_ambulances:
+        await db.ambulances.update_one({"_id": amb["_id"]}, {"$set": amb}, upsert=True)
+
+    demo_incidents = [
+        {
+            "_id": "inc-demo-cardiac-01",
+            "caller_id": "caller-9876543210",
+            "idempotency_key": "demo-cardiac-01",
+            "request_hash": "hash-cardiac-01",
+            "location": {"type": "Point", "coordinates": [77.2195, 28.6315]},
+            "accuracy_m": 8.0,
+            "address": "Inner Circle, Connaught Place, Block B, New Delhi",
+            "severity": "CRITICAL",
+            "status": "QUEUED",
+            "caller_info": {
+                "name": "Ramesh Gupta",
+                "phone": "+91 98765 43210",
+                "notes": "🔴 CRITICAL: Acute crushing chest pain, radiating to left arm. Profuse diaphoresis, shortness of breath. Bystander assistance requested.",
+            },
+            "assigned_unit_id": None,
+            "destination_hospital_id": "hosp-aiims-01",
+            "received_at": now_iso,
+            "updated_at": now_iso,
+            "eta_seconds": 240,
+        },
+        {
+            "_id": "inc-demo-trauma-02",
+            "caller_id": "caller-9811223344",
+            "idempotency_key": "demo-trauma-02",
+            "request_hash": "hash-trauma-02",
+            "location": {"type": "Point", "coordinates": [77.2075, 28.5714]},
+            "accuracy_m": 12.0,
+            "address": "Safdarjung Flyover, Ring Road Northbound",
+            "severity": "HIGH",
+            "status": "QUEUED",
+            "caller_info": {
+                "name": "Pooja Sharma",
+                "phone": "+91 98112 23344",
+                "notes": "🟠 HIGH: High-speed motorcycle collision. Compound lower limb injury with active hemorrhage. Conscious, severe distress.",
+            },
+            "assigned_unit_id": None,
+            "destination_hospital_id": "hosp-aiims-01",
+            "received_at": now_iso,
+            "updated_at": now_iso,
+            "eta_seconds": 380,
+        },
+        {
+            "_id": "inc-demo-asthma-03",
+            "caller_id": "caller-9899112233",
+            "idempotency_key": "demo-asthma-03",
+            "request_hash": "hash-asthma-03",
+            "location": {"type": "Point", "coordinates": [77.2433, 28.5677]},
+            "accuracy_m": 15.0,
+            "address": "Central Market, Lajpat Nagar II, New Delhi",
+            "severity": "MEDIUM",
+            "status": "VALIDATING",
+            "caller_info": {
+                "name": "Ananya Roy",
+                "phone": "+91 98991 12233",
+                "notes": "🟡 MEDIUM: Acute asthmatic attack. Inhaler refractory. Audible wheezing and tachypnea.",
+            },
+            "assigned_unit_id": None,
+            "destination_hospital_id": None,
+            "received_at": now_iso,
+            "updated_at": now_iso,
+            "eta_seconds": None,
+        },
+        {
+            "_id": "inc-demo-fall-04",
+            "caller_id": "caller-9711002233",
+            "idempotency_key": "demo-fall-04",
+            "request_hash": "hash-fall-04",
+            "location": {"type": "Point", "coordinates": [77.1906, 28.6517]},
+            "accuracy_m": 20.0,
+            "address": "Near Karol Bagh Metro Station Gate 2",
+            "severity": "LOW",
+            "status": "RECEIVED",
+            "caller_info": {
+                "name": "Sanjay Verma",
+                "phone": "+91 97110 02233",
+                "notes": "🟢 LOW: Slip and fall. Right wrist swelling and forehead abrasion. Ambulatory, vitals stable.",
+            },
+            "assigned_unit_id": None,
+            "destination_hospital_id": None,
+            "received_at": now_iso,
+            "updated_at": now_iso,
+            "eta_seconds": None,
+        },
+    ]
+    for inc in demo_incidents:
+        await db.incidents.update_one({"_id": inc["_id"]}, {"$set": inc}, upsert=True)
+
+    await ws_manager.broadcast_dispatcher({"type": "incident_update", "data": {"seeded": len(demo_incidents)}})
+    await ws_manager.broadcast_dispatcher({"type": "fleet_update", "data": {"seeded": len(demo_ambulances)}})
+
+    return {
+        "status": "ok",
+        "incidents_seeded": len(demo_incidents),
+        "ambulances_seeded": len(demo_ambulances),
+    }
+
+
 @router.websocket("/ws")
 async def dispatcher_websocket(websocket: WebSocket):
     """Dispatcher live feed — fleet movements + incident updates."""

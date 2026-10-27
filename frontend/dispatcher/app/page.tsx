@@ -461,8 +461,31 @@ export default function DispatcherPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
             {incidents.length === 0 && (
-              <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "2rem 1rem", fontSize: "0.8125rem" }}>
-                No active emergencies
+              <div style={{ textAlign: "center", padding: "2.5rem 1rem", fontSize: "0.8125rem" }}>
+                <p style={{ color: "var(--text-muted)", marginBottom: "0.75rem" }}>No active emergencies</p>
+                <button
+                  onClick={async () => {
+                    try {
+                      await apiClient.seedDemo();
+                      await fetchData();
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }}
+                  style={{
+                    background: "var(--brand-red)",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "0.55rem 0.95rem",
+                    fontSize: "0.78rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(215, 38, 56, 0.35)",
+                  }}
+                >
+                  ⚡ Populate Demo Queue
+                </button>
               </div>
             )}
             {incidents.map((inc) => (
