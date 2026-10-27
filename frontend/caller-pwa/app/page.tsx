@@ -289,17 +289,13 @@ export default function CallerPWAPage() {
               Platform network
             </a>
             <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noreferrer"
+              href="/dispatcher"
               style={{ color: "var(--brand-navy)", fontWeight: 600 }}
             >
               Dispatcher console ↗
             </a>
             <a
-              href="http://localhost:3002"
-              target="_blank"
-              rel="noreferrer"
+              href="/hospital"
               style={{ color: "var(--brand-navy)", fontWeight: 600 }}
             >
               Hospital console ↗
@@ -485,9 +481,7 @@ export default function CallerPWAPage() {
               🎙️ Call AI Voice Hotline
             </button>
             <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noreferrer"
+              href="/dispatcher"
               style={{
                 background: "#ffffff",
                 color: "var(--brand-navy)",
@@ -998,9 +992,7 @@ export default function CallerPWAPage() {
               </div>
               <div style={{ display: "flex", gap: "12px", marginTop: "2rem" }}>
                 <a
-                  href="http://localhost:3001"
-                  target="_blank"
-                  rel="noreferrer"
+                  href="/dispatcher"
                   style={{
                     background: "#ffffff",
                     color: "var(--brand-navy)",
@@ -1014,9 +1006,7 @@ export default function CallerPWAPage() {
                   Open Dispatcher Board
                 </a>
                 <a
-                  href="http://localhost:3002"
-                  target="_blank"
-                  rel="noreferrer"
+                  href="/hospital"
                   style={{
                     background: "#ffffff",
                     color: "var(--brand-navy)",
@@ -1082,9 +1072,7 @@ export default function CallerPWAPage() {
               Live emergency grid status
             </h2>
             <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noreferrer"
+              href="/dispatcher"
               style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--brand-navy)" }}
             >
               See all active units →
@@ -1164,9 +1152,9 @@ export default function CallerPWAPage() {
               </div>
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.875rem", color: "#cbd5e1" }}>
                 <li><a href="#simulator" style={{ color: "#cbd5e1" }}>Emergency SOS</a></li>
-                <li><a href="http://localhost:3001" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>Dispatcher Board</a></li>
-                <li><a href="http://localhost:3002" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>Hospital Console</a></li>
-                <li><a href="http://localhost:8001/api/docs" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>API Swagger Docs</a></li>
+                <li><a href="/dispatcher" style={{ color: "#cbd5e1" }}>Dispatcher Board</a></li>
+                <li><a href="/hospital" style={{ color: "#cbd5e1" }}>Hospital Console</a></li>
+                <li><a href="https://emrp-backend.onrender.com/api/docs" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>API Swagger Docs</a></li>
               </ul>
             </div>
 

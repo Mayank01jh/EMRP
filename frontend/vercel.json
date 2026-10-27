@@ -1,0 +1,49 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "caller-pwa": {
+      "root": "caller-pwa",
+      "framework": "nextjs"
+    },
+    "dispatcher": {
+      "root": "dispatcher",
+      "framework": "nextjs"
+    },
+    "hospital": {
+      "root": "hospital",
+      "framework": "nextjs"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/dispatcher/(.*)",
+      "destination": {
+        "service": "dispatcher"
+      }
+    },
+    {
+      "source": "/dispatcher",
+      "destination": {
+        "service": "dispatcher"
+      }
+    },
+    {
+      "source": "/hospital/(.*)",
+      "destination": {
+        "service": "hospital"
+      }
+    },
+    {
+      "source": "/hospital",
+      "destination": {
+        "service": "hospital"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "caller-pwa"
+      }
+    }
+  ]
+}
