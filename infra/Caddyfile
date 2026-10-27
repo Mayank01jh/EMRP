@@ -1,0 +1,24 @@
+# Caddyfile — EMRP reverse proxy
+# For local dev, replace emrp.local with your domain
+# For production, Caddy auto-obtains TLS via Let's Encrypt
+
+emrp.local {
+    # API + WebSocket
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    # WS connections need explicit upgrade handling (Caddy handles this automatically)
+    # Caller PWA
+    handle /* {
+        reverse_proxy caller-pwa:3000
+    }
+}
+
+dispatcher.emrp.local {
+    reverse_proxy dispatcher:3001
+}
+
+hospital.emrp.local {
+    reverse_proxy hospital:3002
+}

@@ -1,0 +1,142 @@
+version: "3.9"
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  emrp-net:
+    driver: bridge
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
+  redis-data:
+
+# ── Services ──────────────────────────────────────────────────────────────────
+services:
+
+  # ── MongoDB Replica Set ────────────────────────────────────────────────────
+  mongo1:
+    image: mongo:7
+    hostname: mongo1
+    command: ["mongod", "--replSet", "emrp-rs", "--bind_ip_all"]
+    volumes:
+      - mongo1-data:/data/db
+    networks: [emrp-net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo2:
+    image: mongo:7
+    hostname: mongo2
+    command: ["mongod", "--replSet", "emrp-rs", "--bind_ip_all"]
+    volumes:
+      - mongo2-data:/data/db
+    networks: [emrp-net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo3:
+    image: mongo:7
+    hostname: mongo3
+    command: ["mongod", "--replSet", "emrp-rs", "--bind_ip_all"]
+    volumes:
+      - mongo3-data:/data/db
+    networks: [emrp-net]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      mongo1: { condition: service_healthy }
+      mongo2: { condition: service_healthy }
+      mongo3: { condition: service_healthy }
+    volumes:
+      - ./mongo-init:/scripts
+    networks: [emrp-net]
+    entrypoint: ["bash", "/scripts/init-replicaset.sh"]
+    restart: "no"
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks: [emrp-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── OSRM Routing Engine (demo: OpenStreetMap excerpt) ─────────────────────
+  # In production replace with a proper OSRM deployment with your city's map
+  # osrm:
+  #   image: ghcr.io/project-osrm/osrm-backend
+  #   command: osrm-routed --algorithm mld /data/map.osrm
+  #   networks: [emrp-net]
+  #   volumes: [./osrm-data:/data]
+
+  # ── API Server ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ../backend
+      target: api
+    env_file: ../.env
+    environment:
+      MONGO_URI: mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=emrp-rs
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks: [emrp-net]
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Arq Worker ─────────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ../backend
+      target: worker
+    env_file: ../.env
+    environment:
+      MONGO_URI: mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=emrp-rs
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [emrp-net]
+    restart: unless-stopped
+
+  # ── Caddy Reverse Proxy ────────────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [emrp-net]
+    restart: unless-stopped
