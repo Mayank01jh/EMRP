@@ -233,6 +233,8 @@ export default function DispatcherPage() {
         if (fresh && (fresh.status !== selected.status || fresh.assigned_unit_id !== selected.assigned_unit_id)) {
           setSelected(fresh);
         }
+      } else if (inc.length > 0) {
+        setSelected(inc[0]);
       }
     } catch (e) {
       console.error(e);
@@ -421,6 +423,22 @@ export default function DispatcherPage() {
             <span style={{ color: "var(--text-muted)" }}>Available Units: </span>
             <strong style={{ color: "var(--green-400)" }}>{stats.available}</strong>
           </div>
+          <button
+            onClick={() => fetchData()}
+            style={{
+              fontSize: "0.72rem",
+              padding: "0.25rem 0.6rem",
+              borderRadius: "4px",
+              border: "1.5px solid #bfdbfe",
+              background: "#eff6ff",
+              color: "#1e40af",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+            title="Refresh active incidents and fleet"
+          >
+            🔄 Refresh
+          </button>
           <button
             onClick={() => apiClient.purgeStaleIncidents(30).then(fetchData)}
             style={{
