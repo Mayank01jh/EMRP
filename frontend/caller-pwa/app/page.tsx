@@ -1154,7 +1154,7 @@ export default function CallerPWAPage() {
                 <li><a href="#simulator" style={{ color: "#cbd5e1" }}>Emergency SOS</a></li>
                 <li><a href="/dispatcher" style={{ color: "#cbd5e1" }}>Dispatcher Board</a></li>
                 <li><a href="/hospital" style={{ color: "#cbd5e1" }}>Hospital Console</a></li>
-                <li><a href="https://emrp-backend.onrender.com/api/docs" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>API Swagger Docs</a></li>
+                <li><a href="https://emrp.onrender.com/api/docs" target="_blank" rel="noreferrer" style={{ color: "#cbd5e1" }}>API Swagger Docs</a></li>
               </ul>
             </div>
 
