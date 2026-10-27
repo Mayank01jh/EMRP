@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # Dispatch tunables
     offer_expiry_seconds: int = 15
-    max_dispatch_radius_km: float = 50.0
+    max_dispatch_radius_km: float = 15.0
     max_offer_rounds: int = 5
 
     # Voice IVR & Maps Integration

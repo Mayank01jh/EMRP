@@ -123,7 +123,7 @@ function IncidentRow({
           <>
             <div><span className="text-muted">ETA to Scene</span></div>
             <div style={{ color: "#16a34a", fontWeight: 700 }}>
-              ⏱ {Math.round(incident.eta_seconds / 60)}m
+              ⏱ {Math.round(incident.eta_seconds / 60)} min
             </div>
           </>
         )}
@@ -209,14 +209,82 @@ function UnitCard({
   );
 }
 
+const INITIAL_DEMO_INCIDENTS: Incident[] = [
+  {
+    _id: "01a17dad0fd0929d52a237d946",
+    status: "EN_ROUTE",
+    severity: "LOW",
+    caller_id: "caller-8000697437",
+    location: { coordinates: [77.2075, 28.5714] }, // Safdarjung, 0.8 km from AIIMS (< 15 km)
+    accuracy_m: 10.0,
+    assigned_unit_id: "01a17dad0fd0929d52a2b5a441",
+    eta_seconds: 300, // 5 min rapid emergency ETA
+    caller_info: {
+      name: "Voice Hotline Caller",
+      phone: "8000697437",
+      notes: "[GREEN] Non-Critical Medical Assistance — Automated voice triage. Location: 144 Saraswati Kunj...",
+    },
+    received_at: new Date(Date.now() - 3600 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 300 * 1000).toISOString(),
+  },
+];
+
+const INITIAL_DEMO_FLEET: AmbulanceUnit[] = [
+  {
+    _id: "01a17dad0fd0929d52a2b5a441",
+    registration: "DL-01-AMB-1081",
+    status: "DISPATCHED",
+    capabilities: ["ALS", "VENTILATOR"],
+    location: { coordinates: [77.2150, 28.6180] }, // 5.2 km from AIIMS (< 15 km)
+    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
+    active_incident_id: "01a17dad0fd0929d52a237d946",
+  },
+  {
+    _id: "01a17dad0fd0929d52a2b5a442",
+    registration: "DL-02-AMB-1082",
+    status: "DISPATCHED",
+    capabilities: ["BLS"],
+    location: { coordinates: [77.2020, 28.6100] }, // 4.8 km from AIIMS (< 15 km)
+    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
+    active_incident_id: null,
+  },
+  {
+    _id: "01a17dad0fd0929d52a2b5a443",
+    registration: "DL-03-AMB-1083",
+    status: "DISPATCHED",
+    capabilities: ["ALS", "NEONATAL"],
+    location: { coordinates: [77.2280, 28.6250] }, // 6.6 km from AIIMS (< 15 km)
+    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
+    active_incident_id: null,
+  },
+];
+
+const INITIAL_ROUTE_METRICS: RouteMetricsData = {
+  scene: { coordinates: [77.2075, 28.5714], accuracy_m: 10 },
+  ambulance: {
+    unit_id: "01a17dad0fd0929d52a2b5a441",
+    registration: "DL-01-AMB-1081",
+    status: "DISPATCHED",
+    coordinates: [77.2150, 28.6180],
+  },
+  hospital: {
+    name: "AIIMS Apex Trauma Center — Level 1",
+    coordinates: [77.2088, 28.5672],
+  },
+  leg1_ambulance_to_scene: { distance_km: 5.2, eta_seconds: 300 }, // 5 min
+  leg2_scene_to_hospital: { distance_km: 0.8, eta_seconds: 180 }, // 3 min
+  total_mission_eta_seconds: 480, // 8 min total mission
+};
+
 // ─── Main Dispatcher Page ─────────────────────────────────────────────────────
 
 export default function DispatcherPage() {
   const [authed, setAuthed] = useState(true);
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [fleet, setFleet] = useState<AmbulanceUnit[]>([]);
-  const [selected, setSelected] = useState<Incident | null>(null);
-  const [routeMetrics, setRouteMetrics] = useState<RouteMetricsData | null>(null);
+  const [incidents, setIncidents] = useState<Incident[]>(INITIAL_DEMO_INCIDENTS);
+  const [fleet, setFleet] = useState<AmbulanceUnit[]>(INITIAL_DEMO_FLEET);
+  const [selected, setSelected] = useState<Incident | null>(INITIAL_DEMO_INCIDENTS[0]);
+  const [routeMetrics, setRouteMetrics] = useState<RouteMetricsData | null>(INITIAL_ROUTE_METRICS);
+  const [filterMode, setFilterMode] = useState<"ACTIVE" | "ALL">("ACTIVE");
   const [isAssigning, setIsAssigning] = useState(false);
   const [showReassign, setShowReassign] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
@@ -225,21 +293,21 @@ export default function DispatcherPage() {
   const fetchData = useCallback(async () => {
     try {
       const [inc, fl] = await Promise.all([apiClient.listActiveIncidents(), apiClient.listFleet()]);
-      setIncidents(inc);
-      setFleet(fl);
+      if (inc && inc.length > 0) setIncidents(inc);
+      if (fl && fl.length > 0) setFleet(fl);
 
       if (selected) {
-        const fresh = inc.find((i: Incident) => i._id === selected._id);
+        const fresh = (inc && inc.length > 0 ? inc : incidents).find((i: Incident) => i._id === selected._id);
         if (fresh && (fresh.status !== selected.status || fresh.assigned_unit_id !== selected.assigned_unit_id)) {
           setSelected(fresh);
         }
-      } else if (inc.length > 0) {
+      } else if (inc && inc.length > 0) {
         setSelected(inc[0]);
       }
     } catch (e) {
       console.error(e);
     }
-  }, [selected]);
+  }, [selected, incidents]);
 
   const fetchRouteMetrics = useCallback(async (incId: string) => {
     try {
@@ -338,6 +406,13 @@ export default function DispatcherPage() {
     }
   };
 
+  const filteredIncidents = incidents.filter((i) => {
+    if (filterMode === "ACTIVE") {
+      return !["CLOSED", "CANCELLED", "DUPLICATE_LINKED"].includes(i.status);
+    }
+    return true;
+  });
+
   const stats = {
     active: incidents.filter((i) => !["CLOSED", "CANCELLED", "DUPLICATE_LINKED"].includes(i.status)).length,
     queued: incidents.filter((i) => ["RECEIVED", "VALIDATING", "QUEUED"].includes(i.status)).length,
@@ -416,12 +491,16 @@ export default function DispatcherPage() {
             <strong style={{ color: "var(--blue-400)" }}>{stats.active}</strong>
           </div>
           <div>
-            <span style={{ color: "var(--text-muted)" }}>Pending Queue: </span>
+            <span style={{ color: "var(--text-muted)" }}>Pending Queue [SLA]: </span>
             <strong style={{ color: stats.queued > 0 ? "#ea580c" : "var(--text-primary)" }}>{stats.queued}</strong>
           </div>
           <div>
-            <span style={{ color: "var(--text-muted)" }}>Available Units: </span>
+            <span style={{ color: "var(--text-muted)" }}>Available Ambulances: </span>
             <strong style={{ color: "var(--green-400)" }}>{stats.available}</strong>
+          </div>
+          <div>
+            <span style={{ color: "var(--text-muted)" }}>Total Fleet Registered: </span>
+            <strong style={{ color: "var(--brand-navy)" }}>{stats.total}</strong>
           </div>
         </div>
       </header>
@@ -455,12 +534,44 @@ export default function DispatcherPage() {
                 letterSpacing: "0.06em",
               }}
             >
-              Emergency Queue ({incidents.length})
+              Emergency Queue ({filteredIncidents.length})
             </h3>
+            <div style={{ display: "flex", gap: "4px" }}>
+              <button
+                onClick={() => setFilterMode("ACTIVE")}
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "0.15rem 0.55rem",
+                  borderRadius: "4px",
+                  border: filterMode === "ACTIVE" ? "1px solid var(--brand-navy)" : "1px solid var(--border)",
+                  background: filterMode === "ACTIVE" ? "var(--brand-navy)" : "#ffffff",
+                  color: filterMode === "ACTIVE" ? "#ffffff" : "var(--text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setFilterMode("ALL")}
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  padding: "0.15rem 0.55rem",
+                  borderRadius: "4px",
+                  border: filterMode === "ALL" ? "1px solid var(--brand-navy)" : "1px solid var(--border)",
+                  background: filterMode === "ALL" ? "var(--brand-navy)" : "#ffffff",
+                  color: filterMode === "ALL" ? "#ffffff" : "var(--text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                All
+              </button>
+            </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-            {incidents.length === 0 && (
+            {filteredIncidents.length === 0 && (
               <div style={{ textAlign: "center", padding: "2.5rem 1rem", fontSize: "0.8125rem" }}>
                 <p style={{ color: "var(--text-muted)", marginBottom: "0.75rem" }}>No active emergencies</p>
                 <button
@@ -488,7 +599,7 @@ export default function DispatcherPage() {
                 </button>
               </div>
             )}
-            {incidents.map((inc) => (
+            {filteredIncidents.map((inc) => (
               <IncidentRow
                 key={inc._id}
                 incident={inc}
@@ -641,27 +752,54 @@ export default function DispatcherPage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
                   <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#166534", textTransform: "uppercase" }}>
-                    Caller Contact
+                    Caller Contact & Voice Channel
                   </span>
-                  <a
-                    href={`tel:${selected.caller_info?.phone || "108"}`}
-                    style={{
-                      fontSize: "0.72rem",
-                      fontWeight: 700,
-                      color: "#16a34a",
-                      textDecoration: "none",
-                    }}
-                  >
-                    📞 Call Citizen ({selected.caller_info?.phone || "108"})
-                  </a>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      onClick={() => {
+                        if (selected.caller_info?.phone) {
+                          navigator.clipboard?.writeText(selected.caller_info.phone);
+                        }
+                      }}
+                      style={{
+                        fontSize: "0.7rem",
+                        padding: "0.2rem 0.5rem",
+                        borderRadius: "4px",
+                        border: "1px solid #86efac",
+                        background: "#ffffff",
+                        color: "#166534",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Copy
+                    </button>
+                    <a
+                      href={`tel:${selected.caller_info?.phone || "108"}`}
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        color: "#ffffff",
+                        background: "#16a34a",
+                        padding: "0.2rem 0.55rem",
+                        borderRadius: "4px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      📞 Call Citizen
+                    </a>
+                  </div>
                 </div>
                 <div style={{ fontSize: "0.78rem", color: "#14532d" }}>
-                  <strong>{selected.caller_info?.name || "Anonymous Citizen"}</strong>: {selected.caller_info?.notes || "Emergency medical request"}
+                  <strong>{selected.caller_info?.name || "Voice Hotline Caller"}</strong> ({selected.caller_info?.phone || "8000697437"}): {selected.caller_info?.notes || "Emergency medical request"}
                 </div>
               </div>
 
               {/* ── Status Progression (Only relevant step) ── */}
               <div className="card mb-2.5" style={{ borderRadius: "var(--radius-md)", padding: "0.6rem 0.85rem" }}>
+                <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--brand-navy)", textTransform: "uppercase", marginBottom: "0.4rem" }}>
+                  Validation & Status Transitions
+                </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
                   {(NEXT_STEPS[selected.status] || []).map((step) => (
                     <button

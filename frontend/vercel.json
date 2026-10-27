@@ -16,6 +16,10 @@
   },
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://emrp.onrender.com/api/$1"
+    },
+    {
       "source": "/dispatcher/(.*)",
       "destination": {
         "service": "dispatcher"

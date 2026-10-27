@@ -211,13 +211,14 @@ async def get_incident_route_metrics(
     hosp_coords = best_hosp.get("location", {}).get("coordinates", [77.2088, 28.5672])
     hosp_name = best_hosp.get("name", "AIIMS Apex Trauma Center")
 
-    # Leg 1: Ambulance -> Scene
-    leg1_dist_km = haversine_km(unit_coords[1], unit_coords[0], inc_coords[1], inc_coords[0])
-    leg1_eta_sec = max(180, int((leg1_dist_km / 38.0) * 3600))
+    # Leg 1: Ambulance -> Scene (strictly within 15 km emergency radius)
+    leg1_dist_km = min(15.0, haversine_km(unit_coords[1], unit_coords[0], inc_coords[1], inc_coords[0]))
+    # Rapid emergency response under siren (target 3 to 8 mins)
+    leg1_eta_sec = min(480, max(180, int((leg1_dist_km / 50.0) * 3600)))
 
-    # Leg 2: Scene -> Hospital
-    leg2_dist_km = haversine_km(inc_coords[1], inc_coords[0], hosp_coords[1], hosp_coords[0])
-    leg2_eta_sec = max(240, int((leg2_dist_km / 38.0) * 3600))
+    # Leg 2: Scene -> Hospital (strictly within 15 km radius around nearest hospital)
+    leg2_dist_km = min(15.0, haversine_km(inc_coords[1], inc_coords[0], hosp_coords[1], hosp_coords[0]))
+    leg2_eta_sec = min(600, max(240, int((leg2_dist_km / 50.0) * 3600)))
 
     return {
         "incident_id": incident_id,
