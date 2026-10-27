@@ -120,7 +120,7 @@ export default function VoiceHotlineModal({
     setCallStep("PROCESSING");
     try {
       const loc = location || { latitude: 28.6139, longitude: 77.2090, accuracy: 15 };
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://emrp.onrender.com/api/v1";
       const res = await fetch(`${apiBase}/voice/process-call`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
