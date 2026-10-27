@@ -151,7 +151,11 @@ def create_app() -> FastAPI:
     app.include_router(triage_router, prefix=prefix)
     app.include_router(voice_ivr_router, prefix=prefix)
 
-    # ── Health Check ─────────────────────────────────────────────────────────
+    # ── Health & Root ────────────────────────────────────────────────────────
+    @app.get("/", tags=["Health"])
+    async def root():
+        return {"service": "EMRP API", "status": "online", "docs": "/api/docs", "health": "/health"}
+
     @app.get("/health", tags=["Health"])
     async def health():
         return {"status": "ok", "service": "emrp-backend"}
