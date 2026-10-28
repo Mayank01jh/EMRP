@@ -222,22 +222,6 @@ export default function HospitalConsole() {
             }}
           >
             <img src="/emrp-logo.jpg?v=3" alt="EMRP Logo" style={{ height: "42px", width: "auto", objectFit: "contain" }} />
-            <span
-              style={{
-                fontSize: "11px",
-                background: "var(--bg-tertiary)",
-                color: "var(--text-muted)",
-                padding: "3px 8px",
-                borderRadius: "999px",
-                border: "1px solid var(--border)",
-                fontWeight: "600",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "3px",
-              }}
-            >
-              ← Main Page
-            </span>
           </a>
           <div style={{ width: "1px", height: "34px", background: "var(--border)" }} />
           <div>

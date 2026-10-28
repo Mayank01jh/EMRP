@@ -483,22 +483,7 @@ export default function DispatcherPage() {
             <span style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--brand-navy)" }}>
               EMRP Dispatch Console
             </span>
-            <span
-              style={{
-                fontSize: "0.7rem",
-                background: "#f1f5f9",
-                color: "#475569",
-                padding: "2px 7px",
-                borderRadius: "999px",
-                border: "1px solid #cbd5e1",
-                fontWeight: 600,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "2px",
-              }}
-            >
-              ← Main Page
-            </span>
+
           </a>
 
           <div
