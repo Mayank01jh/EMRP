@@ -49,16 +49,15 @@ async def get_hotline_config():
         "gemini_powered": True,
         "active_features": [
             "Automatic Caller ID (ANI) phone capture",
-            "Automated Voice Prompts for severity & condition",
-            "Audio recording of address & landmarks",
-            "Gemini AI voice-to-text transcription",
-            "Real-time location capture while call is active",
+            "Automated Voice Prompt: What is the case?",
+            "Instant End Call & Dispatch action",
+            "Gemini AI voice-to-text triage & severity analysis",
+            "Automatic location capture via active GPS telemetry",
             "Instant dispatcher console WebSocket broadcast",
         ],
         "script": {
-            "step_1_greeting": "This is the Emergency Medical Response automated dispatch hotline. What is your medical emergency?",
-            "step_2_address": "Please clearly state the exact street address, building, or landmark where the patient is located.",
-            "step_3_confirmation": "Your emergency has been triaged. Ambulances in your sector are being notified.",
+            "step_1_greeting": "This is the Emergency Medical Response automated dispatch hotline. What is the case?",
+            "step_2_confirmation": "Your emergency case has been recorded. Help is being dispatched.",
         },
     }
 
@@ -168,7 +167,7 @@ async def twiml_inbound_voice(From: str = Form(default="+919876543210")):
 <Response>
     <Say voice="Polly.Aditi" language="en-IN">
         Emergency Medical Response dispatch hotline.
-        Please describe your medical emergency and state your exact location or landmark after the beep.
+        Please describe what is the case after the beep. Hang up or press pound when finished.
     </Say>
     <Record 
         action="/api/v1/voice/twiml/recorded?CallerPhone={From}" 
@@ -178,8 +177,7 @@ async def twiml_inbound_voice(From: str = Form(default="+919876543210")):
         playBeep="true"
     />
     <Say voice="Polly.Aditi" language="en-IN">
-        We did not receive your recording. Connecting to emergency operator now.
+        Thank you. Your emergency case has been recorded and help is being dispatched.
     </Say>
-    <Dial>108</Dial>
 </Response>"""
     return Response(content=twiml_response, media_type="application/xml")
