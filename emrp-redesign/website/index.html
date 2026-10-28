@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="EMRP connects callers, dispatchers, ambulances and emergency rooms. Tap SOS or speak, and help is already moving.">
+<title>EMRP | Emergency Medical Response Platform</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{--ink:#101418;--bone:#F6F5F2;--red:#E5383B;--redtxt:#B3262A;--redsoft:#FCE4E4;--mint:#DFF3EA;--mintink:#14634F;--mute:#585E66;--line:#E3E1DB}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--bone);color:var(--ink);line-height:1.55}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.w{max-width:1120px;margin:0 auto;padding:0 28px}
+.btn{display:inline-block;padding:15px 28px;border-radius:999px;font-weight:700;text-decoration:none;border:2px solid var(--ink);min-height:48px}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.ink{background:var(--ink);color:#fff}
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:22px 0}
+.logo{font-weight:800;font-size:24px;text-decoration:none}.logo i{color:var(--red);font-style:normal}
+nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-weight:700}
+nav ul a{text-decoration:none}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;padding:56px 0 96px}
+h1{font-size:clamp(40px,6vw,68px);line-height:1.03;letter-spacing:-.035em;margin:0 0 22px;font-weight:800}
+.lead{font-size:20px;color:var(--mute);max-width:34em;margin:0 0 30px}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.note{margin:22px 0 0;color:var(--mute);font-size:15px}
+/* hero phone: one orchestrated moment, the timeline fills once */
+.phone{justify-self:center;width:310px;border:10px solid var(--ink);border-radius:42px;background:#fff;padding:26px 22px 28px}
+.phone .top{background:var(--mint);color:var(--mintink);font-weight:700;font-size:14px;padding:10px 14px;border-radius:14px}
+.phone .eta{font-size:56px;font-weight:800;letter-spacing:-.04em;margin:22px 0 0;line-height:1}
+.phone .unit{color:var(--mute);font-weight:600;margin:4px 0 22px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px;font-weight:700}
+.tl li{display:flex;gap:12px;align-items:center;color:#6b7078}
+.tl li:before{content:"";width:16px;height:16px;border-radius:50%;border:3px solid var(--line);background:#fff;animation:dot .5s forwards}
+.tl li:nth-child(1){animation:txt .5s .4s forwards}.tl li:nth-child(1):before{animation-delay:.4s}
+.tl li:nth-child(2){animation:txt .5s 1.4s forwards}.tl li:nth-child(2):before{animation-delay:1.4s}
+.tl li:nth-child(3){animation:txt .5s 2.4s forwards}.tl li:nth-child(3):before{animation-delay:2.4s}
+.tl li:nth-child(4){animation:txt .5s 3.4s forwards}.tl li:nth-child(4):before{animation-delay:3.4s}
+@keyframes dot{to{background:var(--mintink);border-color:var(--mintink)}}
+@keyframes txt{to{color:var(--mintink)}}
+@media (prefers-reduced-motion:reduce){.tl li,.tl li:before{animation-duration:.01s!important;animation-delay:0s!important}}
+section{padding:88px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(30px,4vw,44px);letter-spacing:-.03em;line-height:1.1;margin:0 0 14px;font-weight:800}
+.sub{color:var(--mute);font-size:18px;max-width:36em;margin:0 0 44px}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:s;padding:0 24px 0 0;position:relative}
+.flow li:before{content:counter(s);display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;margin-bottom:16px}
+.flow h3{margin:0 0 6px;font-size:20px}.flow p{margin:0;color:var(--mute)}
+.views{display:grid;gap:0}
+.views div{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:26px 0;border-top:1px solid var(--line)}
+.views div:first-child{border-top:0;padding-top:0}
+.views h3{margin:0;font-size:22px}.views p{margin:0;color:var(--mute);max-width:46em}
+.dark{background:var(--ink);color:#fff;border-top:0}
+.dark .sub{color:#C5C9D1}
+.safe{display:grid;grid-template-columns:repeat(2,1fr);gap:36px 56px}
+.safe h3{margin:0 0 6px;font-size:20px}.safe p{margin:0;color:#C5C9D1}
+.final{text-align:center}
+.final .cta{justify-content:center}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--mute);font-size:15px}
+@media(max-width:860px){.hero{grid-template-columns:1fr;gap:40px}.flow{grid-template-columns:1fr 1fr;gap:32px 0}.views div{grid-template-columns:1fr;gap:6px}.safe{grid-template-columns:1fr}nav ul{display:none}}
+@media(max-width:520px){.flow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="w">
+<nav aria-label="Main">
+  <a class="logo" href="#"><i>+</i> EMRP</a>
+  <ul><li><a href="#how">How it works</a></li><li><a href="#views">Who uses it</a></li><li><a href="#reliable">Reliability</a></li></ul>
+  <a class="btn ink" href="http://localhost:3005">Open the app</a>
+</nav>
+
+<div class="hero">
+  <div>
+    <h1>Say what happened. Help is already moving.</h1>
+    <p class="lead">EMRP finds you, understands the emergency, sends the nearest ambulance and warns the hospital while the crew is still on the road. You never have to spell out an address.</p>
+    <div class="cta"><a class="btn red" href="http://localhost:3005">Get the app</a><a class="btn" href="#how">See how it works</a></div>
+    <p class="note">In a life-threatening emergency, you can always call 112.</p>
+  </div>
+  <div class="phone" role="img" aria-label="Phone showing an ambulance four minutes away with status steps filling in">
+    <div class="top">Location locked, good signal</div>
+    <div class="eta">4 min</div>
+    <div class="unit">DL-01-AMB-1081 · ALS crew</div>
+    <ol class="tl"><li>Request received</li><li>Ambulance assigned</li><li>On the way</li><li>Hospital ready</li></ol>
+  </div>
+</div>
+</div>
+
+<section id="how"><div class="w">
+  <h2>From first tap to ready bay</h2>
+  <p class="sub">One emergency passes through four hands. EMRP keeps all of them looking at the same facts.</p>
+  <ol class="flow">
+    <li><h3>You call</h3><p>Hold SOS, or speak to the AI hotline. Your GPS and phone number go with the call.</p></li>
+    <li><h3>AI listens</h3><p>Gemini reads the severity and symptoms and opens an incident for the dispatcher.</p></li>
+    <li><h3>Dispatch sends</h3><p>The dispatcher assigns an ambulance, or auto-dispatch picks the closest free unit.</p></li>
+    <li><h3>ER prepares</h3><p>The hospital sees vitals and arrival time, and gets the right team in place.</p></li>
+  </ol>
+</div></section>
+
+<section id="views"><div class="w">
+  <h2>One emergency, three screens</h2>
+  <p class="sub">Each person sees only what they need to act.</p>
+  <div class="views">
+    <div><h3>Callers</h3><p>A single SOS button, a voice hotline in English and Hindi, and a live countdown that shows when help arrives.</p></div>
+    <div><h3>Dispatchers</h3><p>A live queue sorted by urgency, a map with every ambulance, route times for both legs of the trip, and one-click assignment.</p></div>
+    <div><h3>Hospitals</h3><p>Inbound alerts with paramedic vitals, toggles for beds, scanner and cath lab, and one-click acknowledgment back to dispatch.</p></div>
+  </div>
+</div></section>
+
+<section id="reliable" class="dark"><div class="w">
+  <h2>Built for the day something breaks</h2>
+  <p class="sub">Emergency tools cannot stop working. These safeguards are part of the platform.</p>
+  <div class="safe">
+    <div><h3>No double dispatch</h3><p>An ambulance is assigned atomically, so two dispatchers can never send the same unit.</p></div>
+    <div><h3>No duplicate alerts</h3><p>Pressing SOS twice returns the original incident instead of creating a second one.</p></div>
+    <div><h3>Works without AI or maps</h3><p>If the AI or routing service times out, rule-based triage and straight-line distances take over.</p></div>
+    <div><h3>A record of every step</h3><p>Each status change is written to a tamper-evident audit log.</p></div>
+  </div>
+</div></section>
+
+<section class="final"><div class="w">
+  <h2>Be ready before you need it</h2>
+  <p class="sub" style="margin-left:auto;margin-right:auto">Install the app on your phone, or open the consoles your team uses.</p>
+  <div class="cta"><a class="btn red" href="http://localhost:3005">Get the app</a><a class="btn" href="http://localhost:3001">Dispatcher console</a><a class="btn" href="http://localhost:3002">Hospital console</a></div>
+</div></section>
+
+<footer><div class="w">EMRP, Emergency Medical Response Platform. Automated hotline: +91 11 4084 9108</div></footer>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101418">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>EMRP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{--ink:#101418;--bone:#F6F5F2;--red:#E5383B;--redsoft:#FCE4E4;--mint:#DFF3EA;--mintink:#14634F;--mute:#585E66;--line:#E3E1DB}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--bone);color:var(--ink)}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0}
+.logo{font-weight:800;font-size:22px}.logo i{color:var(--red);font-style:normal}
+.chip{font-weight:700;font-size:14px;padding:8px 14px;border-radius:999px;background:var(--line);color:var(--mute)}
+.chip.good{background:var(--mint);color:var(--mintink)}.chip.bad{background:var(--redsoft);color:#a1161a}
+main{flex:1;padding:0 20px}
+.screen{display:none;flex-direction:column;min-height:calc(100dvh - 160px)}.screen.on{display:flex}
+h2{font-size:26px;margin:24px 0 8px;letter-spacing:-.5px}
+p{line-height:1.55;color:var(--mute);margin:0 0 12px}
+.sev{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 0;border:0;padding:0}
+.sev label{flex:1 1 40%;position:relative}
+.sev input{position:absolute;opacity:0}
+.sev span{display:block;text-align:center;padding:12px;border-radius:14px;background:#fff;border:2px solid var(--line);font-weight:700;min-height:44px}
+.sev input:checked+span{border-color:var(--ink);background:var(--ink);color:#fff}
+.sev input:focus-visible+span{outline:3px solid var(--red);outline-offset:2px}
+.sosWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px 0}
+#sos{position:relative;width:220px;height:220px;border:0;border-radius:50%;background:var(--red);color:#fff;font:800 48px Manrope,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
+#sos svg{position:absolute;inset:-14px;width:248px;height:248px;transform:rotate(-90deg);pointer-events:none}
+#sos circle{fill:none;stroke:var(--ink);stroke-width:6;stroke-dasharray:741;stroke-dashoffset:741}
+#sos.hold circle{stroke-dashoffset:0;transition:stroke-dashoffset 1.2s linear}
+#sos:focus-visible{outline:4px solid var(--ink);outline-offset:6px}
+.btn{display:block;width:100%;min-height:52px;border-radius:999px;border:2px solid var(--ink);background:transparent;font:700 16px Manrope,sans-serif;color:var(--ink);text-align:center;text-decoration:none;padding:14px}
+.btn.fill{background:var(--ink);color:#fff}.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.row{display:flex;gap:10px;margin:8px 0 16px}
+.eta{font-size:64px;font-weight:800;letter-spacing:-2px;margin:16px 0 0}
+.steps{list-style:none;padding:0;margin:16px 0;display:flex;flex-direction:column;gap:14px}
+.steps li{display:flex;gap:12px;align-items:center;font-weight:700;color:#6b7078}
+.steps li:before{content:"";width:16px;height:16px;border-radius:50%;border:3px solid var(--line);background:#fff}
+.steps li.done{color:var(--mintink)}.steps li.done:before{background:var(--mintink);border-color:var(--mintink)}
+.steps li.cur{color:var(--ink)}.steps li.cur:before{background:var(--red);border-color:var(--red)}
+label.f{display:block;font-weight:700;margin:16px 0 6px}
+input[type=text],input[type=tel],select{width:100%;min-height:48px;border-radius:12px;border:2px solid var(--line);padding:10px 14px;font:500 16px Manrope,sans-serif;background:#fff}
+nav{position:sticky;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-height:56px;border:0;background:none;font:700 14px Manrope,sans-serif;color:var(--mute)}
+nav button[aria-current=true]{color:var(--red)}
+dialog{border:0;border-radius:24px;padding:24px;width:min(440px,92vw)}
+dialog::backdrop{background:rgba(16,20,24,.6)}
+.bubble{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0;line-height:1.5}
+.bubble.me{background:var(--ink);color:#fff;margin-left:36px}
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+.err{background:var(--redsoft);color:#7f1216;border-radius:16px;padding:14px;margin:12px 0;display:none}
+.err.on{display:block}.err a{color:#7f1216;font-weight:800}
+@media (prefers-reduced-motion:reduce){#sos.hold circle{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="logo"><i>+</i> EMRP</div><span id="loc" class="chip">Finding location</span></header>
+<main>
+<section id="s-help" class="screen on" aria-label="Get help">
+  <fieldset class="sev"><legend class="m" style="font-weight:700;margin-bottom:8px">How serious is it?</legend>
+    <label><input type="radio" name="sev" value="CRITICAL" checked><span>Critical</span></label>
+    <label><input type="radio" name="sev" value="HIGH"><span>High</span></label>
+    <label><input type="radio" name="sev" value="MEDIUM"><span>Medium</span></label>
+    <label><input type="radio" name="sev" value="LOW"><span>Low</span></label>
+  </fieldset>
+  <div class="sosWrap">
+    <button id="sos" aria-label="Hold to send SOS">SOS<svg viewBox="0 0 248 248"><circle cx="124" cy="124" r="118"/></svg></button>
+    <p style="text-align:center;margin:0">Hold for a moment to send your location.</p>
+  </div>
+  <div id="err" class="err" role="alert"></div>
+  <button id="voiceBtn" class="btn">Speak to the hotline</button>
+  <a class="btn" style="margin:10px 0 20px" href="tel:112">Call 112</a>
+</section>
+
+<section id="s-track" class="screen" aria-label="Track ambulance">
+  <h2 id="tTitle">No active emergency</h2>
+  <p id="tSub">When you send an SOS, the ambulance status and arrival time appear here.</p>
+  <div class="eta" id="eta" aria-live="polite"></div>
+  <div class="m" id="unit" style="font-weight:700;color:var(--mute)"></div>
+  <ol class="steps" id="steps">
+    <li data-s="RECEIVED">Received</li><li data-s="ASSIGNED">Ambulance assigned</li><li data-s="EN_ROUTE">On the way</li><li data-s="ON_SCENE">Arrived</li>
+  </ol>
+</section>
+
+<section id="s-set" class="screen" aria-label="Settings">
+  <h2>Settings</h2>
+  <label class="f" for="cApi">Server address</label><input id="cApi" type="text" inputmode="url">
+  <label class="f" for="cPhone">Your phone number</label><input id="cPhone" type="tel">
+  <label class="f" style="display:flex;gap:10px;align-items:center"><input id="cDemo" type="checkbox"> Demo mode (no server needed)</label>
+  <button id="save" class="btn fill" style="margin-top:20px">Save settings</button>
+</section>
+</main>
+<nav aria-label="Main"><button data-go="help" aria-current="true">Help</button><button data-go="track">Track</button><button data-go="set">Settings</button></nav>
+</div>
+
+<dialog id="dlg" aria-labelledby="dT">
+  <h2 id="dT" style="margin-top:0">Hotline</h2>
+  <label class="f" for="lang" style="margin-top:0">Language</label>
+  <select id="lang"><option value="en-IN">English</option><option value="hi-IN">हिंदी</option></select>
+  <div id="chat" aria-live="polite"></div>
+  <div class="row" style="margin-top:16px"><button id="vStop" class="btn">Close</button><button id="vGo" class="btn red">Talk</button></div>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const store={get:(k,d)=>{try{return localStorage.getItem(k)??d}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const cfg={api:store.get('api','http://127.0.0.1:8001/api/v1'),phone:store.get('phone',''),demo:store.get('demo','0')==='1'};
+let pos=null,key=null,ws=null,sim=null,etaTimer=null;
+const STEPS=['RECEIVED','ASSIGNED','EN_ROUTE','ON_SCENE'];
+
+/* ---------- helpers ---------- */
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)}
+function go(n){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+n));document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.go===n))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+function showErr(msg){const e=$('#err');e.innerHTML=msg+' <a href="tel:112">Call 112 now</a>';e.classList.add('on')}
+async function api(path,opt={}){const r=await fetch(cfg.api+path,{...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+
+/* ---------- location ---------- */
+function setLoc(p){pos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};const a=pos.acc,c=$('#loc');
+  c.textContent=(a<=30?'Good':a<=100?'Fair':'Poor')+' signal, '+Math.round(a)+' m';c.className='chip '+(a<=100?'good':'bad')}
+if(navigator.geolocation){navigator.geolocation.watchPosition(setLoc,()=>{$('#loc').textContent='Location off';$('#loc').className='chip bad'},{enableHighAccuracy:true,maximumAge:5000})}
+else{$('#loc').textContent='No GPS';$('#loc').className='chip bad'}
+
+/* ---------- SOS ---------- */
+// If your FastAPI schema uses different field names, change them here only.
+function buildSosPayload(){
+  return {
+    latitude: pos.lat,
+    longitude: pos.lng,
+    accuracy_m: Math.round(pos.acc || 15),
+    severity: document.querySelector('input[name=sev]:checked').value,
+    caller_info: {
+      name: 'Emergency Mobile App Caller',
+      phone: cfg.phone || '8000697437',
+      notes: 'Submitted via Mobile SOS App'
+    }
+  };
+}
+async function sendSos(){
+  if(!pos){toast('Waiting for your location');return}
+  $('#err').classList.remove('on');
+  key=key||crypto.randomUUID();           // same key on retry, so no duplicate incident
+  try{
+    if(cfg.demo)return track('DEMO-'+key.slice(0,4).toUpperCase(),true);
+    const d=await api('/emergency/sos',{method:'POST',headers:{'Idempotency-Key':key},body:JSON.stringify(buildSosPayload())});
+    key=null;track(d.id||d.incident_id||d._id,false);
+  }catch(e){showErr('Could not reach the EMRP server.')}
+}
+const sos=$('#sos');let holdT=null;
+function holdStart(e){e.preventDefault();sos.classList.add('hold');holdT=setTimeout(()=>{holdEnd();if(navigator.vibrate)navigator.vibrate(200);sendSos()},1200)}
+function holdEnd(){clearTimeout(holdT);sos.classList.remove('hold')}
+sos.addEventListener('pointerdown',holdStart);['pointerup','pointerleave','pointercancel'].forEach(t=>sos.addEventListener(t,holdEnd));
+sos.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.repeat)holdStart(e)});sos.addEventListener('keyup',holdEnd);
+
+/* ---------- tracking ---------- */
+function paint(status,eta,unit){
+  const i=Math.max(0,STEPS.indexOf(status));
+  document.querySelectorAll('#steps li').forEach((li,n)=>li.className=n<i?'done':n===i?'cur':'');
+  $('#tTitle').textContent={RECEIVED:'We have your request',ASSIGNED:'An ambulance is assigned',EN_ROUTE:'Help is on the way',ON_SCENE:'Help has arrived'}[STEPS[i]];
+  $('#tSub').textContent='Stay where you are and keep your phone nearby.';
+  $('#eta').textContent=eta!=null&&status!=='ON_SCENE'?eta+' min':'';
+  $('#unit').textContent=unit||'';
+}
+function track(id,simulated){
+  go('track');paint('RECEIVED',null,'Request '+id);
+  if(ws)ws.close();clearInterval(sim);
+  if(simulated){let n=0,eta=6;sim=setInterval(()=>{n=Math.min(n+1,3);paint(STEPS[n],n<3?eta--:0,n>0?'DL-01-AMB-1081 · ALS crew':'');if(n===3)clearInterval(sim)},4000);return}
+  try{ws=new WebSocket(cfg.api.replace(/^http/,'ws')+'/emergency/'+id+'/ws');
+    ws.onmessage=m=>{try{
+      const raw=JSON.parse(m.data);
+      const d=raw.data||raw;
+      const etaMin=d.eta_seconds!=null?Math.round(d.eta_seconds/60):(d.eta_minutes??d.eta??null);
+      paint(d.status||'RECEIVED',etaMin,d.assigned_unit_id||d.ambulance_id||d.unit||'');
+    }catch(e){}};
+    ws.onclose=()=>toast('Live updates paused')}catch(e){}
+}
+
+/* ---------- voice hotline ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function say(t){const b=document.createElement('div');b.className='bubble';b.textContent=t;$('#chat').append(b);
+  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(t);u.lang=$('#lang').value;speechSynthesis.speak(u)}}
+function hear(t){const b=document.createElement('div');b.className='bubble me';b.textContent=t;$('#chat').append(b)}
+$('#voiceBtn').onclick=()=>{$('#chat').innerHTML='';$('#dlg').showModal();say($('#lang').value==='hi-IN'?'आपातकालीन चिकित्सा हॉटलाइन। क्या हुआ है?':'Emergency medical response automated hotline. What is the case?')};
+$('#vStop').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}$('#dlg').close()};
+$('#vGo').onclick=()=>{
+  if(!SR){say('Voice input is not supported in this browser. Use Chrome, or tap SOS.');return}
+  const r=new SR();r.lang=$('#lang').value;r.interimResults=false;
+  r.onresult=async ev=>{const t=ev.results[0][0].transcript;hear(t);
+    if(!pos){say('I could not get your location. Please turn on GPS.');return}
+    try{
+      if(cfg.demo){say('Help is being sent. Stay on the line.');$('#dlg').close();return track('DEMO-VOICE',true)}
+      const d=await api('/voice/process-call',{method:'POST',body:JSON.stringify({transcript:t,latitude:pos.lat,longitude:pos.lng,caller_phone:cfg.phone||'8000697437',caller_name:'Citizen Mobile App Caller',accuracy_m:Math.round(pos.acc||15)})});
+      say('Help is being sent. Stay on the line.');$('#dlg').close();track(d.id||d.incident_id||d._id,false)
+    }catch(e){say('I could not reach the server. Please call 112.')}};
+  r.onerror=()=>say('I did not catch that. Tap Talk and try again.');
+  r.start();toast('Listening')};
+
+/* ---------- settings ---------- */
+$('#cApi').value=cfg.api;$('#cPhone').value=cfg.phone;$('#cDemo').checked=cfg.demo;
+$('#save').onclick=()=>{cfg.api=$('#cApi').value.trim().replace(/\/$/,'');cfg.phone=$('#cPhone').value.trim();cfg.demo=$('#cDemo').checked;
+  store.set('api',cfg.api);store.set('phone',cfg.phone);store.set('demo',cfg.demo?'1':'0');toast('Saved');go('help')};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
