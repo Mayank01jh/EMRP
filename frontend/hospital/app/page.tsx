@@ -191,7 +191,54 @@ export default function HospitalConsole() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <img src="/emrp-logo.jpg?v=3" alt="EMRP Logo" style={{ height: "42px", width: "auto", objectFit: "contain" }} />
+          <a
+            href="/"
+            onClick={(e) => {
+              if (typeof window !== "undefined") {
+                if (
+                  window.location.port &&
+                  window.location.port !== "3000" &&
+                  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+                ) {
+                  e.preventDefault();
+                  window.location.href = `${window.location.protocol}//${window.location.hostname}:3000`;
+                }
+              }
+            }}
+            title="← Back to EMRP Main Page"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              cursor: "pointer",
+              transition: "opacity 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.85";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+          >
+            <img src="/emrp-logo.jpg?v=3" alt="EMRP Logo" style={{ height: "42px", width: "auto", objectFit: "contain" }} />
+            <span
+              style={{
+                fontSize: "11px",
+                background: "var(--bg-tertiary)",
+                color: "var(--text-muted)",
+                padding: "3px 8px",
+                borderRadius: "999px",
+                border: "1px solid var(--border)",
+                fontWeight: "600",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "3px",
+              }}
+            >
+              ← Main Page
+            </span>
+          </a>
           <div style={{ width: "1px", height: "34px", background: "var(--border)" }} />
           <div>
             <h1 style={{ fontSize: "18px", fontWeight: "800", letterSpacing: "-0.01em", margin: 0, color: "var(--text-primary)" }}>

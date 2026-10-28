@@ -447,7 +447,34 @@ export default function DispatcherPage() {
         }}
       >
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
+          <a
+            href="/"
+            onClick={(e) => {
+              if (typeof window !== "undefined") {
+                if (
+                  window.location.port &&
+                  window.location.port !== "3000" &&
+                  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+                ) {
+                  e.preventDefault();
+                  window.location.href = `${window.location.protocol}//${window.location.hostname}:3000`;
+                }
+              }
+            }}
+            title="← Back to EMRP Main Page"
+            className="flex items-center gap-2.5 group"
+            style={{
+              textDecoration: "none",
+              cursor: "pointer",
+              transition: "transform 0.15s ease, opacity 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.85";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+          >
             <img
               src="/emrp-logo.jpg?v=3"
               alt="EMRP Logo"
@@ -456,7 +483,23 @@ export default function DispatcherPage() {
             <span style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--brand-navy)" }}>
               EMRP Dispatch Console
             </span>
-          </div>
+            <span
+              style={{
+                fontSize: "0.7rem",
+                background: "#f1f5f9",
+                color: "#475569",
+                padding: "2px 7px",
+                borderRadius: "999px",
+                border: "1px solid #cbd5e1",
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "2px",
+              }}
+            >
+              ← Main Page
+            </span>
+          </a>
 
           <div
             className="flex items-center gap-1.5"
