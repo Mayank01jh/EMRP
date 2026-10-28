@@ -23,51 +23,14 @@ interface CapacityState {
   trauma_team_standby: boolean;
 }
 
-const DEFAULT_PRE_ALERTS: PreAlertData[] = [
-  {
-    alert_id: "alert-001",
-    incident_id: "inc-01J9A1B2C3",
-    ambulance_id: "AMB-04",
-    triage_category: "RED",
-    eta_seconds: 420,
-    suspected_condition: "Acute STEMI / Anterior Wall Infarction",
-    vitals: {
-      heart_rate: 118,
-      blood_pressure: "85/55",
-      spo2_pct: 91,
-      respiratory_rate: 26,
-      gcs: 14,
-    },
-    notes: "Aspirin 325mg and Heparin administered at 12:08. Cath lab requested on standby.",
-    created_at: new Date(Date.now() - 360000).toISOString(),
-    acknowledged_at: null,
-  },
-  {
-    alert_id: "alert-002",
-    incident_id: "inc-01J9A2D4E5",
-    ambulance_id: "AMB-01",
-    triage_category: "YELLOW",
-    eta_seconds: 780,
-    suspected_condition: "Blunt Thoracic Trauma (MVA)",
-    vitals: {
-      heart_rate: 96,
-      blood_pressure: "125/82",
-      spo2_pct: 97,
-      respiratory_rate: 18,
-      gcs: 15,
-    },
-    notes: "C-spine immobilized. Stable airway. Fast exam negative in field.",
-    created_at: new Date(Date.now() - 180000).toISOString(),
-    acknowledged_at: new Date(Date.now() - 90000).toISOString(),
-  },
-];
+const DEFAULT_PRE_ALERTS: PreAlertData[] = [];
 
 export default function HospitalConsole() {
   const [hospitalId, setHospitalId] = useState("HOSP-001");
   const [hospitalName, setHospitalName] = useState("City Central Trauma Center — Level 1");
   const [wsConnected, setWsConnected] = useState(false);
-  const [preAlerts, setPreAlerts] = useState<PreAlertData[]>(DEFAULT_PRE_ALERTS);
-  const [selectedAlert, setSelectedAlert] = useState<PreAlertData | null>(DEFAULT_PRE_ALERTS[0]);
+  const [preAlerts, setPreAlerts] = useState<PreAlertData[]>([]);
+  const [selectedAlert, setSelectedAlert] = useState<PreAlertData | null>(null);
   const [ackLoading, setAckLoading] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 

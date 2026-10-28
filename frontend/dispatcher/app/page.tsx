@@ -209,25 +209,7 @@ function UnitCard({
   );
 }
 
-const INITIAL_DEMO_INCIDENTS: Incident[] = [
-  {
-    _id: "01a17dad0fd0929d52a237d946",
-    status: "EN_ROUTE",
-    severity: "LOW",
-    caller_id: "caller-8000697437",
-    location: { coordinates: [77.2075, 28.5714] }, // Safdarjung, 0.8 km from AIIMS (< 15 km)
-    accuracy_m: 10.0,
-    assigned_unit_id: "01a17dad0fd0929d52a2b5a441",
-    eta_seconds: 300, // 5 min rapid emergency ETA
-    caller_info: {
-      name: "Voice Hotline Caller",
-      phone: "8000697437",
-      notes: "[GREEN] Non-Critical Medical Assistance — Automated voice triage. Location: 144 Saraswati Kunj...",
-    },
-    received_at: new Date(Date.now() - 3600 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 300 * 1000).toISOString(),
-  },
-];
+const INITIAL_DEMO_INCIDENTS: Incident[] = [];
 
 const INITIAL_DEMO_FLEET: AmbulanceUnit[] = [
   {
@@ -280,10 +262,10 @@ const INITIAL_ROUTE_METRICS: RouteMetricsData = {
 
 export default function DispatcherPage() {
   const [authed, setAuthed] = useState(true);
-  const [incidents, setIncidents] = useState<Incident[]>(INITIAL_DEMO_INCIDENTS);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [fleet, setFleet] = useState<AmbulanceUnit[]>(INITIAL_DEMO_FLEET);
-  const [selected, setSelected] = useState<Incident | null>(INITIAL_DEMO_INCIDENTS[0]);
-  const [routeMetrics, setRouteMetrics] = useState<RouteMetricsData | null>(INITIAL_ROUTE_METRICS);
+  const [selected, setSelected] = useState<Incident | null>(null);
+  const [routeMetrics, setRouteMetrics] = useState<RouteMetricsData | null>(null);
   const [filterMode, setFilterMode] = useState<"ACTIVE" | "ALL">("ACTIVE");
   const [isAssigning, setIsAssigning] = useState(false);
   const [showReassign, setShowReassign] = useState(false);
@@ -293,21 +275,22 @@ export default function DispatcherPage() {
   const fetchData = useCallback(async () => {
     try {
       const [inc, fl] = await Promise.all([apiClient.listActiveIncidents(), apiClient.listFleet()]);
-      if (inc && inc.length > 0) setIncidents(inc);
+      // Filter out any dummy demo incidents so only genuine emergencies appear
+      const realIncidents: Incident[] = (inc || []).filter(
+        (i: any) => !i._id?.startsWith("inc-demo-") && i._id !== "01a17dad0fd0929d52a237d946"
+      );
+      setIncidents(realIncidents);
       if (fl && fl.length > 0) setFleet(fl);
 
-      if (selected) {
-        const fresh = (inc && inc.length > 0 ? inc : incidents).find((i: Incident) => i._id === selected._id);
-        if (fresh && (fresh.status !== selected.status || fresh.assigned_unit_id !== selected.assigned_unit_id)) {
-          setSelected(fresh);
-        }
-      } else if (inc && inc.length > 0) {
-        setSelected(inc[0]);
-      }
+      setSelected((prev) => {
+        if (!prev) return realIncidents.length > 0 ? realIncidents[0] : null;
+        const fresh = realIncidents.find((i) => i._id === prev._id);
+        return fresh || (realIncidents.length > 0 ? realIncidents[0] : null);
+      });
     } catch (e) {
-      console.error(e);
+      console.error("fetchData error:", e);
     }
-  }, [selected, incidents]);
+  }, []);
 
   const fetchRouteMetrics = useCallback(async (incId: string) => {
     try {
@@ -601,30 +584,7 @@ export default function DispatcherPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
             {filteredIncidents.length === 0 && (
               <div style={{ textAlign: "center", padding: "2.5rem 1rem", fontSize: "0.8125rem" }}>
-                <p style={{ color: "var(--text-muted)", marginBottom: "0.75rem" }}>No active emergencies</p>
-                <button
-                  onClick={async () => {
-                    try {
-                      await apiClient.seedDemo();
-                      await fetchData();
-                    } catch (e) {
-                      console.error(e);
-                    }
-                  }}
-                  style={{
-                    background: "var(--brand-red)",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "0.55rem 0.95rem",
-                    fontSize: "0.78rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: "0 2px 8px rgba(215, 38, 56, 0.35)",
-                  }}
-                >
-                  ⚡ Populate Demo Queue
-                </button>
+                <p style={{ color: "var(--text-muted)" }}>No active emergencies in queue</p>
               </div>
             )}
             {filteredIncidents.map((inc) => (

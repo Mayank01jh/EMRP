@@ -29,8 +29,8 @@ from app.websockets.manager import ws_manager
 router = APIRouter(prefix="/emergency", tags=["Emergency"])
 
 
-def _get_arq(request: Request) -> ArqRedis:
-    return request.app.state.arq
+def _get_arq(request: Request) -> ArqRedis | None:
+    return getattr(request.app.state, "arq", None)
 
 
 @router.post("/sos", response_model=SOSResponse, status_code=status.HTTP_201_CREATED)
@@ -64,11 +64,29 @@ async def create_sos(
         ip_address=ip,
     )
 
-    # Enqueue dispatch via Arq (non-blocking)
+    # Enqueue dispatch via Arq (non-blocking with fallback)
     if incident.status == IncidentStatus.RECEIVED:
-        arq = _get_arq(request)
-        if arq:
-            await arq.enqueue_job("process_dispatch", incident.id)
+        try:
+            arq = _get_arq(request)
+            if arq:
+                await arq.enqueue_job("process_dispatch", incident.id)
+        except Exception as e:
+            logger.warning("Arq dispatch enqueue skipped", error=str(e))
+
+    # Broadcast to dispatcher console WebSockets
+    try:
+        await ws_manager.broadcast_dispatcher({
+            "type": "incident_update",
+            "data": {
+                "incident_id": incident.id,
+                "status": incident.status.value,
+                "severity": incident.severity.value,
+                "location": incident.location.model_dump() if incident.location else None,
+                "caller_info": incident.caller_info,
+            },
+        })
+    except Exception as e:
+        logger.warning("Dispatcher WS broadcast skipped", error=str(e))
 
     return SOSResponse(
         incident_id=incident.id,
