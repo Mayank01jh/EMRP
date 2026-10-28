@@ -281,7 +281,7 @@ export default function CallerPWAPage() {
           >
             <a href="#how-it-works" style={{ color: "var(--text-secondary)" }}>
               How it works
-            </a>0000000000000000.............................
+            </a>
 
           </div>
 
