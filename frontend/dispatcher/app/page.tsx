@@ -211,35 +211,7 @@ function UnitCard({
 
 const INITIAL_DEMO_INCIDENTS: Incident[] = [];
 
-const INITIAL_DEMO_FLEET: AmbulanceUnit[] = [
-  {
-    _id: "01a17dad0fd0929d52a2b5a441",
-    registration: "DL-01-AMB-1081",
-    status: "DISPATCHED",
-    capabilities: ["ALS", "VENTILATOR"],
-    location: { coordinates: [77.2150, 28.6180] }, // 5.2 km from AIIMS (< 15 km)
-    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
-    active_incident_id: "01a17dad0fd0929d52a237d946",
-  },
-  {
-    _id: "01a17dad0fd0929d52a2b5a442",
-    registration: "DL-02-AMB-1082",
-    status: "DISPATCHED",
-    capabilities: ["BLS"],
-    location: { coordinates: [77.2020, 28.6100] }, // 4.8 km from AIIMS (< 15 km)
-    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
-    active_incident_id: null,
-  },
-  {
-    _id: "01a17dad0fd0929d52a2b5a443",
-    registration: "DL-03-AMB-1083",
-    status: "DISPATCHED",
-    capabilities: ["ALS", "NEONATAL"],
-    location: { coordinates: [77.2280, 28.6250] }, // 6.6 km from AIIMS (< 15 km)
-    last_seen_at: new Date(Date.now() - 1200 * 1000).toISOString(),
-    active_incident_id: null,
-  },
-];
+const INITIAL_DEMO_FLEET: AmbulanceUnit[] = [];
 
 const INITIAL_ROUTE_METRICS: RouteMetricsData = {
   scene: { coordinates: [77.2075, 28.5714], accuracy_m: 10 },
@@ -262,7 +234,7 @@ const INITIAL_ROUTE_METRICS: RouteMetricsData = {
 
 export default function DispatcherPage() {
   const [authed, setAuthed] = useState(true);
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>(INITIAL_DEMO_INCIDENTS);
   const [fleet, setFleet] = useState<AmbulanceUnit[]>(INITIAL_DEMO_FLEET);
   const [selected, setSelected] = useState<Incident | null>(null);
   const [routeMetrics, setRouteMetrics] = useState<RouteMetricsData | null>(null);
@@ -275,18 +247,15 @@ export default function DispatcherPage() {
   const fetchData = useCallback(async () => {
     try {
       const [inc, fl] = await Promise.all([apiClient.listActiveIncidents(), apiClient.listFleet()]);
-      // Filter out any dummy demo incidents so only genuine emergencies appear
-      const realIncidents: Incident[] = (inc || []).filter(
-        (i: any) => !i._id?.startsWith("inc-demo-") && i._id !== "01a17dad0fd0929d52a237d946"
-      );
-      setIncidents(realIncidents);
-      if (fl && fl.length > 0) setFleet(fl);
-
-      setSelected((prev) => {
-        if (!prev) return realIncidents.length > 0 ? realIncidents[0] : null;
-        const fresh = realIncidents.find((i) => i._id === prev._id);
-        return fresh || (realIncidents.length > 0 ? realIncidents[0] : null);
-      });
+      if (Array.isArray(inc)) {
+        setIncidents(inc);
+        setSelected((prev) => {
+          if (!prev) return inc.length > 0 ? inc[0] : null;
+          const fresh = inc.find((i: Incident) => i._id === prev._id);
+          return fresh || (inc.length > 0 ? inc[0] : null);
+        });
+      }
+      if (Array.isArray(fl)) setFleet(fl);
     } catch (e) {
       console.error("fetchData error:", e);
     }

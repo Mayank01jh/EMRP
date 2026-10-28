@@ -138,9 +138,15 @@ async def process_emergency_call(
 
     # Real-time WebSocket broadcast to Dispatchers
     try:
-        await ws_manager.broadcast_dispatcher({
+        ws_payload = {
+            **incident_doc,
+            "received_at": now.isoformat() if hasattr(now, "isoformat") else str(now),
+            "created_at": now.isoformat() if hasattr(now, "isoformat") else str(now),
+            "updated_at": now.isoformat() if hasattr(now, "isoformat") else str(now),
+        }
+        await ws_manager.broadcast_to_dispatchers({
             "type": "incident_update",
-            "data": incident_doc,
+            "data": ws_payload,
         })
     except Exception:
         pass

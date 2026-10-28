@@ -7,11 +7,11 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 try:
-    from ulid import ULID
+    import ulid
     def new_id() -> str:
         """Generate a sortable ULID string."""
-        return str(ULID())
-except ImportError:
+        return str(ulid.new())
+except Exception:
     import time
     import uuid
     def new_id() -> str:

@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, WebSocke
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.database import get_db
+from app.core.logging import logger
 from app.core.security import get_current_user
 from app.models.incident import (
     IncidentStatus, SOSRequest, SOSResponse, IncidentStatusUpdate,
@@ -75,14 +76,14 @@ async def create_sos(
 
     # Broadcast to dispatcher console WebSockets
     try:
-        await ws_manager.broadcast_dispatcher({
+        await ws_manager.broadcast_to_dispatchers({
             "type": "incident_update",
             "data": {
                 "incident_id": incident.id,
                 "status": incident.status.value,
                 "severity": incident.severity.value,
                 "location": incident.location.model_dump() if incident.location else None,
-                "caller_info": incident.caller_info,
+                "caller_info": incident.caller_info.model_dump() if hasattr(incident.caller_info, "model_dump") else incident.caller_info,
             },
         })
     except Exception as e:
