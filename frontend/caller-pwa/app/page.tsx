@@ -285,21 +285,7 @@ export default function CallerPWAPage() {
             <a href="#simulator" style={{ color: "var(--text-secondary)" }}>
               Response simulator
             </a>
-            <a href="#ecosystem" style={{ color: "var(--text-secondary)" }}>
-              Platform network
-            </a>
-            <a
-              href="/dispatcher"
-              style={{ color: "var(--brand-navy)", fontWeight: 600 }}
-            >
-              Dispatcher console ↗
-            </a>
-            <a
-              href="/hospital"
-              style={{ color: "var(--brand-navy)", fontWeight: 600 }}
-            >
-              Hospital console ↗
-            </a>
+
           </div>
 
           {/* Right Action Buttons */}
@@ -413,7 +399,7 @@ export default function CallerPWAPage() {
         )}
 
         {/* ── Hero Section (Aligned with large headline + 2 buttons) ───────── */}
-        <section style={{ paddingTop: "3.5rem", paddingBottom: "3rem" }}>
+        <section style={{ paddingTop: "4.5rem", paddingBottom: "4rem" }}>
           <h1
             style={{
               fontSize: "clamp(2.5rem, 4.5vw, 4rem)",
@@ -442,7 +428,7 @@ export default function CallerPWAPage() {
             instant clinical pre-alerts before arrival.
           </p>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "2rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "2.5rem", flexWrap: "wrap" }}>
             <button
               onClick={() => {
                 const el = document.getElementById("simulator");
@@ -480,24 +466,6 @@ export default function CallerPWAPage() {
             >
               🎙️ Call AI Voice Hotline
             </button>
-            <a
-              href="/dispatcher"
-              style={{
-                background: "#ffffff",
-                color: "var(--brand-navy)",
-                border: "1.5px solid #cbd5e1",
-                borderRadius: "8px",
-                padding: "0.85rem 1.5rem",
-                fontSize: "1rem",
-                fontWeight: 700,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                cursor: "pointer",
-              }}
-            >
-              🚑 Dispatcher Console
-            </a>
           </div>
         </section>
 
