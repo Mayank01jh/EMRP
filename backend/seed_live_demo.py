@@ -6,8 +6,11 @@ import os
 from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URI = "mongodb+srv://Mayank1234:mayank1234@mydata.ezd5wcv.mongodb.net/?retryWrites=true&w=majority"
-DB_NAME = "emrp"
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb://localhost:27017/?replicaSet=emrp-rs"
+)
+DB_NAME = os.getenv("MONGO_DB", "emrp")
 
 def utcnow():
     return datetime.now(timezone.utc)

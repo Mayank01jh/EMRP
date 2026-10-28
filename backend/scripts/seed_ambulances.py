@@ -2,9 +2,13 @@ import asyncio
 from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 
+import os
+
 async def main():
-    client = AsyncIOMotorClient("mongodb+srv://Mayank1234:mayank1234@mydata.ezd5wcv.mongodb.net/?retryWrites=true&w=majority")
-    db = client.emrp
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/?replicaSet=emrp-rs")
+    db_name = os.getenv("MONGO_DB", "emrp")
+    client = AsyncIOMotorClient(mongo_uri)
+    db = client[db_name]
     now = datetime.now(timezone.utc)
     coords = [
         ("DL-01-AMB-1081", [77.2195, 28.6315], "AVAILABLE"),
