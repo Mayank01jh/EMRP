@@ -23,16 +23,177 @@ interface CapacityState {
   trauma_team_standby: boolean;
 }
 
-const DEFAULT_PRE_ALERTS: PreAlertData[] = [];
+const DEFAULT_PRE_ALERTS: PreAlertData[] = [
+  {
+    alert_id: "ALT-1081-STEMI",
+    incident_id: "INC-89421A",
+    ambulance_id: "DL-01-AMB-1081",
+    triage_category: "RED",
+    eta_seconds: 340,
+    suspected_condition: "Acute Anterior STEMI / Cardiogenic Shock",
+    vitals: {
+      heart_rate: 118,
+      blood_pressure: "85/55",
+      spo2_pct: 91,
+      respiratory_rate: 26,
+      gcs: 14,
+    },
+    notes: "Aspirin 325mg and Heparin administered at 17:08. Patient diaphoresis. Cath lab activation and trauma bay 1 standby requested immediately.",
+    created_at: new Date(Date.now() - 180000).toISOString(),
+    acknowledged_at: null,
+  },
+  {
+    alert_id: "ALT-1082-TRAUMA",
+    incident_id: "INC-73910B",
+    ambulance_id: "DL-02-AMB-1082",
+    triage_category: "RED",
+    eta_seconds: 520,
+    suspected_condition: "High-Speed Vehicular Collision / Thoracic Trauma",
+    vitals: {
+      heart_rate: 126,
+      blood_pressure: "95/60",
+      spo2_pct: 94,
+      respiratory_rate: 28,
+      gcs: 13,
+    },
+    notes: "Bilateral needle thoracostomy performed in field. C-spine collar applied. Massive transfusion protocol standby requested.",
+    created_at: new Date(Date.now() - 320000).toISOString(),
+    acknowledged_at: new Date(Date.now() - 120000).toISOString(),
+  },
+  {
+    alert_id: "ALT-1083-STROKE",
+    incident_id: "INC-61028C",
+    ambulance_id: "DL-03-AMB-1083",
+    triage_category: "YELLOW",
+    eta_seconds: 710,
+    suspected_condition: "Acute Ischemic Stroke / Left Hemiplegia (Onset < 60 min)",
+    vitals: {
+      heart_rate: 88,
+      blood_pressure: "172/98",
+      spo2_pct: 98,
+      respiratory_rate: 18,
+      gcs: 15,
+    },
+    notes: "Last known normal 45 min ago. Blood glucose 110 mg/dL. Code Stroke announced. Immediate non-contrast CT required upon arrival.",
+    created_at: new Date(Date.now() - 150000).toISOString(),
+    acknowledged_at: null,
+  },
+  {
+    alert_id: "ALT-1084-RESP",
+    incident_id: "INC-55194D",
+    ambulance_id: "DL-04-AMB-1084",
+    triage_category: "YELLOW",
+    eta_seconds: 880,
+    suspected_condition: "Exacerbation of Severe COPD / Acute Bronchospasm",
+    vitals: {
+      heart_rate: 104,
+      blood_pressure: "138/86",
+      spo2_pct: 88,
+      respiratory_rate: 32,
+      gcs: 15,
+    },
+    notes: "Continuous Duoneb nebulization initiated. High-flow oxygen 10L. Non-invasive BiPAP machine requested in resuscitation bay.",
+    created_at: new Date(Date.now() - 90000).toISOString(),
+    acknowledged_at: null,
+  },
+];
+
+const HOSPITAL_OPTIONS = [
+  { id: "hosp-aiims-01", name: "AIIMS Apex Trauma Center — Level 1" },
+  { id: "hosp-safdarjung-02", name: "Safdarjung Multi-Specialty Hospital — Level 1" },
+  { id: "hosp-rml-03", name: "Dr. Ram Manohar Lohia Hospital — Emergency Dept" },
+  { id: "HOSP-001", name: "City Central Trauma Center — Level 1" },
+];
 
 export default function HospitalConsole() {
-  const [hospitalId, setHospitalId] = useState("HOSP-001");
-  const [hospitalName, setHospitalName] = useState("City Central Trauma Center — Level 1");
+  const [hospitalId, setHospitalId] = useState(HOSPITAL_OPTIONS[0].id);
+  const [hospitalName, setHospitalName] = useState(HOSPITAL_OPTIONS[0].name);
   const [wsConnected, setWsConnected] = useState(false);
-  const [preAlerts, setPreAlerts] = useState<PreAlertData[]>([]);
-  const [selectedAlert, setSelectedAlert] = useState<PreAlertData | null>(null);
+  const [preAlerts, setPreAlerts] = useState<PreAlertData[]>(DEFAULT_PRE_ALERTS);
+  const [selectedAlert, setSelectedAlert] = useState<PreAlertData | null>(DEFAULT_PRE_ALERTS[0]);
   const [ackLoading, setAckLoading] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  const handleFacilityChange = (newId: string) => {
+    const selected = HOSPITAL_OPTIONS.find((h) => h.id === newId);
+    if (selected) {
+      setHospitalId(selected.id);
+      setHospitalName(selected.name);
+    }
+  };
+
+  const handleAddSimulatedTransport = () => {
+    const templates = [
+      {
+        condition: "Subarachnoid Hemorrhage / Thunderclap Headache",
+        triage: "RED" as const,
+        eta: 420,
+        hr: 94,
+        bp: "185/110",
+        spo2: 97,
+        rr: 20,
+        gcs: 14,
+        notes: "Sudden onset severe occipital headache with vomiting. Nuchal rigidity present. Emergent CT angiography requested.",
+      },
+      {
+        condition: "Pediatric Anaphylaxis / Severe Bronchospasm",
+        triage: "RED" as const,
+        eta: 290,
+        hr: 142,
+        bp: "82/48",
+        spo2: 89,
+        rr: 36,
+        gcs: 15,
+        notes: "Accidental peanut ingestion. 0.15mg IM Epinephrine administered in thigh at 17:15. Stridor improving, PICU alert requested.",
+      },
+      {
+        condition: "Polytrauma / Fall from 3rd Floor Scaffolding",
+        triage: "RED" as const,
+        eta: 610,
+        hr: 130,
+        bp: "88/52",
+        spo2: 92,
+        rr: 30,
+        gcs: 11,
+        notes: "Pelvic binder placed. Open right femur fracture splinted. 2L warm saline running. Full trauma team activation required.",
+      },
+      {
+        condition: "Acute Diabetic Ketoacidosis / Severe Dehydration",
+        triage: "YELLOW" as const,
+        eta: 750,
+        hr: 112,
+        bp: "102/68",
+        spo2: 98,
+        rr: 28,
+        gcs: 15,
+        notes: "Kussmaul breathing. Fingerstick glucose >500 mg/dL. 1L IV normal saline bolus running via large bore cannula.",
+      },
+    ];
+
+    const pick = templates[Math.floor(Math.random() * templates.length)];
+    const num = Math.floor(1000 + Math.random() * 9000);
+    const newAlert: PreAlertData = {
+      alert_id: `ALT-${num}-${pick.triage}`,
+      incident_id: `INC-${Math.floor(10000 + Math.random() * 90000)}`,
+      ambulance_id: `DL-0${Math.floor(1 + Math.random() * 8)}-AMB-${num}`,
+      triage_category: pick.triage,
+      eta_seconds: pick.eta,
+      suspected_condition: pick.condition,
+      vitals: {
+        heart_rate: pick.hr,
+        blood_pressure: pick.bp,
+        spo2_pct: pick.spo2,
+        respiratory_rate: pick.rr,
+        gcs: pick.gcs,
+      },
+      notes: pick.notes,
+      created_at: new Date().toISOString(),
+      acknowledged_at: null,
+    };
+
+    setPreAlerts((prev) => [newAlert, ...prev]);
+    setSelectedAlert(newAlert);
+  };
 
   const [capacity, setCapacity] = useState<CapacityState>({
     er_beds_total: 32,
@@ -188,10 +349,32 @@ export default function HospitalConsole() {
           </a>
           <div style={{ width: "1px", height: "34px", background: "var(--border)" }} />
           <div>
-            <h1 style={{ fontSize: "18px", fontWeight: "800", letterSpacing: "-0.01em", margin: 0, color: "var(--text-primary)" }}>
-              {hospitalName}
-            </h1>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <select
+                aria-label="Emergency Receiving Facility Selector"
+                value={hospitalId}
+                onChange={(e) => handleFacilityChange(e.target.value)}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: "800",
+                  letterSpacing: "-0.01em",
+                  color: "var(--text-primary)",
+                  background: "var(--bg-primary)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  padding: "5px 10px",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                {HOSPITAL_OPTIONS.map((opt) => (
+                  <option key={opt.id} value={opt.id} style={{ background: "#0f172a", color: "#f8fafc" }}>
+                    {opt.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
               <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
                 Hospital ID: <strong style={{ color: "var(--text-secondary)" }}>{hospitalId}</strong>
               </span>
@@ -307,7 +490,29 @@ export default function HospitalConsole() {
                 {preAlerts.length}
               </span>
             </div>
-            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Live Sort by ETA</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <button
+                onClick={handleAddSimulatedTransport}
+                style={{
+                  background: "rgba(225, 29, 72, 0.15)",
+                  border: "1px solid rgba(225, 29, 72, 0.4)",
+                  color: "var(--brand-crimson)",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  transition: "background 0.15s ease",
+                }}
+                title="Simulate inbound ambulance pre-alert"
+              >
+                ⚡ + Add Transport
+              </button>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Live Sort by ETA</span>
+            </div>
           </div>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
